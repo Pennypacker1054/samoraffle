@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last war Sausage Monkey Golden Train raffle</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(to bottom right, #f8e8d6, #ffeecf);
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    .raffles {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .raffle-box {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    .train-animation {
+      margin: 2rem auto;
+      width: 200px;
+      height: 200px;
+      position: relative;
+    }
+    .track {
+      width: 100%;
+      height: 100%;
+      border: 4px dashed #444;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .train {
+      width: 40px;
+      height: 40px;
+      background: url('https://img.icons8.com/color/48/train.png') no-repeat center/cover;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: -80px center;
+      animation: rotate 3s linear infinite;
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background-color: #ff9800;
+      color: white;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Last war Sausage Monkey Golden Train raffle</h1>
+  <div class="train-animation">
+    <div class="track"></div>
+    <div class="train"></div>
+  </div>
+  <div class="raffles">
+    <div class="raffle-box">
+      <h2>🚂 Train Driver</h2>
+      <button onclick="runRaffle('driver')">Pick Driver</button>
+      <p id="driverResult"></p>
+      <h4>History</h4>
+      <ul id="driverHistory"></ul>
+    </div>
+    <div class="raffle-box">
+      <h2>🧍 Guest</h2>
+      <button onclick="runRaffle('guest')">Pick Guest</button>
+      <p id="guestResult"></p>
+      <h4>History</h4>
+      <ul id="guestHistory"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAssHxmPMkrt0buRMCAsKSpy0IDS1nc344",
+      authDomain: "last-war-train-raffle.firebaseapp.com",
+      projectId: "last-war-train-raffle",
+      storageBucket: "last-war-train-raffle.appspot.com",
+      messagingSenderId: "677547916695",
+      appId: "1:677547916695:web:56995d9f9c33338aa8d8d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const names = [
+      "Penny","Whackz","Ochief","Odulwa","Beccy","Chebs","Chezz","Eyebath","Dark","Diny","Lonewoof","Glory",
+      "Msribs","Super meat boy","Gslick","Fafafada","John wick","T1ron","CommanderGP","Monte","Crow","Juliq",
+      "Poukrave","Kloway","Scousetom","Chph","Donzee","Monika","Bandy","Max","Swebass","Mgomez","I tarta flampe",
+      "Brian griffin","Vautour","Ghostz","Darkher","Karsten","Redal","Flurff","Dagodu","Hole","Zsni","Seth",
+      "Spartacus","King Cody","Ugo2slow","Ad maiora","Jefferzz","Sardeck","Porphy","Nopexy","Peds","Basduv",
+      "Kaaraa","Kulfon","Inspy","Prince","Craiglee","Cruicky","Drday","Lako","Meatpickle","Fox batalioon",
+      "Princess Sam","Ragnar","Lix","Smardy","Ayoub","Gnome","Gravenoak","Dark2","Gaspiunns","Shibs","Weeyin",
+      "Lightning","Mrxxy","Ohlivia","Carbo","Michele","Maxledruide","Kickasself","Flodelios","Daydate 1","Crazydeimos","Dillestil"
+    ];
+
+    async function runRaffle(role) {
+      const colRef = collection(db, role);
+      const docs = await getDocs(colRef);
+      const picked = docs.docs.map(doc => doc.data().name);
+      const remaining = names.filter(name => !picked.includes(name));
+      const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+      if (!chosen) {
+        alert("All names have been picked for this role.");
+        return;
+      }
+      await setDoc(doc(colRef, new Date().toISOString()), { name: chosen });
+      document.getElementById(role + "Result").textContent = "🎉 " + chosen;
+      const li = document.createElement("li");
+      li.textContent = chosen;
+      document.getElementById(role + "History").appendChild(li);
+    }
+
+    // Load previous results
+    window.addEventListener("DOMContentLoaded", async () => {
+      for (const role of ["driver", "guest"]) {
+        const colRef = collection(db, role);
+        const docs = await getDocs(colRef);
+        docs.forEach(docSnap => {
+          const li = document.createElement("li");
+          li.textContent = docSnap.data().name;
+          document.getElementById(role + "History").appendChild(li);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
