@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Static Raffle - Train Driver & Special Guest</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 2rem auto;
+    text-align: center;
+  }
+  select, button {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+  }
+  #winner {
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+</style>
+</head>
+<body>
+
+<h1>Raffle Draw</h1>
+<p>Select a role and press "Pick Winner"</p>
+
+<select id="roleSelect">
+  <option value="trainDriver">Train Driver</option>
+  <option value="specialGuest">Special Guest</option>
+</select>
+<br />
+<button id="pickBtn">Pick Winner</button>
+
+<div id="winner"></div>
+
+<script>
+  const members = [
+    "Penny", "Whackz", "Ochief", "Odulwa", "Beccy", "Chebs", "Chezz", "Eyebath",
+    "Dark", "Diny", "Lonewoof", "Glory", "Msribs", "Super meat boy", "Gslick",
+    "Fafafada", "John wick", "T1ron", "CommanderGP", "Monte", "Crow", "Juliq",
+    "Poukrave", "Kloway", "Scousetom", "Chph", "Donzee", "Monika", "Bandy", "Max",
+    "Swebass", "Mgomez", "I tarta flampe", "Brian griffin", "Vautour", "Ghostz",
+    "Darkher", "Karsten", "Redal", "Flurff", "Dagodu", "Hole", "Zsni", "Seth",
+    "Spartacus", "King Cody", "Ugo2slow", "Ad maiora", "Jefferzz", "Sardeck",
+    "Porphy", "Nopexy", "Peds", "Basduv", "Kaaraa", "Kulfon", "Inspy", "Prince",
+    "Craiglee", "Cruicky", "Drday", "Lako", "Meatpickle", "Fox batalioon",
+    "Princess Sam", "Ragnar", "Lix", "Smardy", "Ayoub", "Gnome", "Gravenoak",
+    "Dark2", "Gaspiunns", "Shibs", "Weeyin", "Lightning", "Mrxxy", "Ohlivia",
+    "Carbo", "Michele", "Maxledruide", "Kickasself", "Flodelios", "Daydate 1",
+    "Crazydeimos", "Dillestil"
+  ];
+
+  const STORAGE_KEYS = {
+    trainDriver: 'raffle_trainDriver_winners',
+    specialGuest: 'raffle_specialGuest_winners'
+  };
+
+  function loadWinners(role) {
+    const saved = localStorage.getItem(STORAGE_KEYS[role]);
+    if (saved) {
+      try {
+        const arr = JSON.parse(saved);
+        if (Array.isArray(arr)) return arr;
+      } catch {}
+    }
+    return [];
+  }
+
+  function saveWinners(role, winners) {
+    localStorage.setItem(STORAGE_KEYS[role], JSON.stringify(winners));
+  }
+
+  function pickWinner(role) {
+    let winners = loadWinners(role);
+
+    if (winners.length >= members.length) {
+      winners = [];
+    }
+
+    const eligible = members.filter(m => !winners.includes(m));
+
+    if (eligible.length === 0) {
+      return null;
+    }
+
+    const winner = eligible[Math.floor(Math.random() * eligible.length)];
+
+    winners.push(winner);
+    saveWinners(role, winners);
+
+    return winner;
+  }
+
+  const pickBtn = document.getElementById('pickBtn');
+  const roleSelect = document.getElementById('roleSelect');
+  const winnerDiv = document.getElementById('winner');
+
+  pickBtn.addEventListener('click', () => {
+    const role = roleSelect.value;
+    const winner = pickWinner(role);
+    if (!winner) {
+      winnerDiv.textContent = `All members have been picked for ${role === 'trainDriver' ? 'Train Driver' : 'Special Guest'}. Resetting... Try again.`;
+    } else {
+      winnerDiv.textContent = `🎉 Winner for ${role === 'trainDriver' ? 'Train Driver' : 'Special Guest'}: ${winner}`;
+    }
+  });
+</script>
+
+</body>
+</html>
